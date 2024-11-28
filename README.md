@@ -2,7 +2,7 @@
 
 ### [Paper](https://www.arxiv.org/pdf/2409.10228) | Webpage (*In Progress*)
 
-This is the official implementation of the paper *Robust Bird's Eye View Segmentation by Adapting DINOv2?* presented at ECCV 2024 - 2nd Workshop on Vision-Centric Autonomous Driving.
+This is the official implementation of the paper *Robust Bird's Eye View Segmentation by Adapting DINOv2* presented at ECCV 2024 - 2nd Workshop on Vision-Centric Autonomous Driving.
 
 ![](figures/methodology.png)
 
