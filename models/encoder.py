@@ -13,7 +13,6 @@ class Encoder_dinov2(nn.Module):
         res = encoder_args['resolution']
         use_lora = encoder_args['use_lora']
         lora_rank = encoder_args['lora_rank']
-        use_qkv = encoder_args['use_qkv']
         finetune = encoder_args['finetune']
 
 
@@ -41,7 +40,7 @@ class Encoder_dinov2(nn.Module):
 
         # Adaptation Setting
         if use_lora:
-            self.model = LoRA_ViT_timm(self.model, r=lora_rank, use_qkv=use_qkv) 
+            self.model = LoRA_ViT_timm(self.model, r=lora_rank) 
         # Finetuning
         elif finetune:
             for param in self.model.parameters():

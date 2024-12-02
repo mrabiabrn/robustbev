@@ -33,14 +33,20 @@ Download NuScenes from [this link](https://www.nuscenes.org/) to `root/to/nuscen
 ```
 torchrun --master_port=12345 --nproc_per_node=<#gpus> train.py \
                                                       --dataset_path "root/to/nuscenes" \
-                                                        --batch_size 16 \
-                                                        --backbone "dinov2_l" \
-                                                        --resolution 224 392 \
-                                                        --ncams 6 \
-                                                        --do_rgbcompress \
-                                                        --num_steps 8000 \
-                                                        --log_freq 500 \
-                                                        --model_save_path "/home/mbarin22/projects/robustbev/robustbev/checkpoints/" \
+                                                      --batch_size 16 \
+                                                      --backbone "dinov2_b" \
+                                                      --use_lora \
+                                                      --lora_rank 32 \
+                                                      --resolution 224 392 \
+                                                      --ncams 6 \
+                                                      --do_rgbcompress \
+                                                      --gradient_acc_steps 1 \
+                                                      --num_steps 25000 \
+                                                      --rand_flip \
+                                                      --rand_crop_and_resize \
+                                                      --do_shuffle_cams \
+                                                      --log_freq 5000 \
+                                                      --model_save_path "root/to/ckpt" \
 ```
 
 
@@ -60,7 +66,7 @@ torchrun --master_port=12345 --nproc_per_node=<#gpus> train.py \
                                                         --rand_crop_and_resize \
                                                         --do_shuffle_cams \
                                                         --log_freq 5000 \
-                                                        --model_save_path "/home/mbarin22/projects/robustbev/robustbev/checkpoints/" \
+                                                        --model_save_path "root/to/ckpt" \
 
 ```
 At the end of the training, you should get mIoU of **42.3**. You can also increase the resolution for reproducing the results with original resolution (47.4)
