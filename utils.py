@@ -72,9 +72,6 @@ def init_logger(args,run_name):
         project_name += '_val'
         run_name = args.checkpoint_path.split('/')[-2]
 
-        if args.validate_on_train:
-            run_name +='_train'
-
     wandb.init(
                 project=project_name, 
                 name=run_name

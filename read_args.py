@@ -17,6 +17,11 @@ def set_remaining_args(args):
         'finetune': args.finetune,
     }
 
+    if args.aug:
+        args.rand_crop_and_resize = True
+        args.rand_flip = True
+        args.do_shuffle_cams = True
+
 
 def print_args(args):
 
@@ -66,6 +71,7 @@ def get_args():
     parser.add_argument('--rand_flip',  action="store_true")
     parser.add_argument('--cams',  nargs='+', type=str, default=['CAM_FRONT_LEFT', 'CAM_FRONT', 'CAM_FRONT_RIGHT', 'CAM_BACK_LEFT', 'CAM_BACK', 'CAM_BACK_RIGHT'])
     parser.add_argument('--ncams', type=int, default=6)
+    parser.add_argument('--aug',  action="store_true")
     parser.add_argument('--do_shuffle_cams',  action="store_true")
     parser.add_argument('--refcam_id', type=int, default=1)
     parser.add_argument('--bounds', nargs='+', type=int, default=[-50, 50, -5, 5, -50, 50])
@@ -89,6 +95,7 @@ def get_args():
     # === Misc ===
     parser.add_argument('--save_epoch', type=int, default=10)
     parser.add_argument('--validate', action="store_true")
+    parser.add_argument('--evaluate_all_val', action="store_true")
     parser.add_argument('--use_checkpoint', action="store_true")
     parser.add_argument('--checkpoint_path', type=str, default=None)
     parser.add_argument('--model_save_path', type=str, default='./checkpoints')

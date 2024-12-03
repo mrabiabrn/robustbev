@@ -64,17 +64,26 @@ def train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloa
                 for k, v in loss_details.items():
                     logs[f"loss/{k}"] = v
 
-                if total_iter % args.log_freq == 0 or total_iter == (len(train_dataloader) * args.num_epochs // args.gradient_acc_steps) - 1:
+                
+                last_iter = (total_iter == (len(train_dataloader) * args.num_epochs // args.gradient_acc_steps) - 1)
+                if total_iter % args.log_freq == 0 or last_iter:
 
                     train_subset_loader = utils.get_random_subset_dataloader(train_dataloader.dataset, n=1000)
                     train_logs, _ = eval(model, train_subset_loader)
                     for k, v in train_logs.items():
                         logs[f"train/{k}"] = v
 
-                    val_logs, val_loss = eval(model, val_dataloader)
+                    if args.evaluate_all_val:
+                        val_logs, val_loss = eval(model, val_dataloader)
+                        
+                    else:
+                        val_subset_loader = utils.get_random_subset_dataloader(val_dataloader.dataset, n=1000)
+                        val_logs, val_loss = eval(model, val_subset_loader)
+
                     for k, v in val_logs.items():
                         logs[f"val/{k}"] = v
                         logs["val/loss"] = val_loss
+
 
         # === Just Calculate ====
         else:

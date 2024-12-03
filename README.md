@@ -30,6 +30,8 @@ Download NuScenes from [this link](https://www.nuscenes.org/) to `root/to/nuscen
 
 
 ### Adaptation Training
+
+- Use DINOv2 ViT-B as backbone with resolution 224x400:
 ```
 torchrun --master_port=12345 --nproc_per_node=<#gpus> train.py \
                                                       --dataset_path "root/to/nuscenes" \
@@ -41,13 +43,48 @@ torchrun --master_port=12345 --nproc_per_node=<#gpus> train.py \
                                                       --ncams 6 \
                                                       --do_rgbcompress \
                                                       --gradient_acc_steps 1 \
+                                                      --learning_rate 0.001 \
                                                       --num_steps 25000 \
-                                                      --rand_flip \
-                                                      --rand_crop_and_resize \
-                                                      --do_shuffle_cams \
                                                       --log_freq 5000 \
+                                                      --evaluate_all_val \
+                                                      --aug     \
                                                       --model_save_path "root/to/ckpt" \
 ```
+This evaluates to 42.3 .
+
+- Use DINOv2 ViT-L as backbone with resolution 448x784:
+```
+torchrun --master_port=12345 --nproc_per_node=<#gpus> train.py \
+                                                      --dataset_path "root/to/nuscenes" \
+                                                      --batch_size 8 \
+                                                      --backbone "dinov2_l" \
+                                                      --use_lora \
+                                                      --lora_rank 32 \
+                                                      --resolution 448 784 \
+                                                      --ncams 6 \
+                                                      --do_rgbcompress \
+                                                      --gradient_acc_steps 5 \
+                                                      --learning_rate 0.001 \
+                                                      --num_steps 8000 \
+                                                      --log_freq 1000 \
+                                                      --model_save_path "root/to/ckpt" \
+```
+For full validation set evaluation of models trained with DINOv2 ViT-L backbone, run the inference script after training:
+```
+torchrun --master_port=12345 --nproc_per_node=1  train.py \
+                                                      --dataset_path "root/to/nuscenes" \
+                                                      --batch_size 8 \
+                                                      --backbone "dinov2_l" \
+                                                      --use_lora \
+                                                      --lora_rank 32 \
+                                                      --resolution 448 784 \
+                                                      --ncams 6 \
+                                                      --do_rgbcompress \
+                                                      --use_checkpoint \
+                                                      --checkpoint_path "checkpoints/[448, 784]simplebev:dinov2_l_bs:8x2_lr:0.001_8k/3.pt"
+                                                      --validate \
+```
+
 
 
 ### Reproducing SimpleBEV
