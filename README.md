@@ -81,7 +81,7 @@ torchrun --master_port=12345 --nproc_per_node=1  train.py \
                                                       --ncams 6 \
                                                       --do_rgbcompress \
                                                       --use_checkpoint \
-                                                      --checkpoint_path "checkpoints/[448, 784]simplebev:dinov2_l_bs:8x2_lr:0.001_8k/3.pt"
+                                                      --checkpoint_path "root/to/ckpt"
                                                       --validate \
 ```
 
