@@ -18,7 +18,7 @@ from read_args import get_args, print_args
 
 
 
-def train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloader, total_iter):
+def train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloader, total_iter, val_info):
     
     total_loss = 0 
 
@@ -83,6 +83,21 @@ def train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloa
                     for k, v in val_logs.items():
                         logs[f"val/{k}"] = v
                         logs["val/loss"] = val_loss
+                    
+                    if val_logs['mIoU'] > val_info['best_val_miou']:
+                        val_info['best_val_miou'] = val_logs['mIoU']
+                        save_dict = {
+                            "model": model.state_dict(),
+                            "optimizer": optimizer.state_dict(),
+                            "scheduler": scheduler.state_dict(),
+                            "epoch": val_info["epoch"] + 1,
+                            "args": args,
+                        }
+                        utils.save_on_master(save_dict, os.path.join(args.model_save_path, val_info['run_name'], f"best.pt"))
+                        epoch = val_info['epoch']
+                        print(f"Model saved at best epoch {epoch}")
+
+
 
 
         # === Just Calculate ====
@@ -108,7 +123,7 @@ def train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloa
         'loss': total_loss / (i + 1),
     }
    
-    return statistics, total_iter
+    return statistics, total_iter, val_info
 
 
 
@@ -220,7 +235,12 @@ def main_worker(args):
 
         print("Starting evaluation!")
         if args.gpu == 0:
-            eval(model, val_dataloader)
+            val_logs, val_loss = eval(model, val_dataloader)
+            logs = {}
+            for k, v in val_logs.items():
+                logs[f"val/{k}"] = v
+                logs["val/loss"] = val_loss
+            wandb.log(logs)
 
         dist.barrier()
         
@@ -240,12 +260,29 @@ def main_worker(args):
 
     total_iter = 0
 
+    val_info = {
+            'best_val_miou': 0,
+            'epoch': start_epoch,
+            'run_name' : run_name
+        }
+
     for epoch in range(start_epoch, args.num_epochs):
         train_dataloader.sampler.set_epoch(epoch)
 
         print(f"===== ===== [Epoch {epoch}] ===== =====")
 
-        statistics, total_iter = train_epoch(args, model, optimizer, scheduler, train_dataloader, val_dataloader, total_iter)
+        
+
+        statistics, total_iter, val_info = train_epoch(args, 
+                                                            model, 
+                                                            optimizer, 
+                                                            scheduler, 
+                                                            train_dataloader, 
+                                                            val_dataloader, 
+                                                            total_iter,
+                                                            val_info
+                                                            ) 
+                                                            
 
         if args.gpu == 0:
 
